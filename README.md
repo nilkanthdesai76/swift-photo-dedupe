@@ -83,12 +83,70 @@ swift run PhotoDedupeApp
 
 ---
 
-## 🛠️ Swift Package Integration
+## 📱 iOS Swift Package Integration
+
+PhotoHashKit includes ready-to-use iOS SwiftUI components, permissions managers, and safe PhotoKit trashing.
+
+### 1. Add to Xcode Project
+In Xcode: **File** $\to$ **Add Package Dependencies...** $\to$ Enter `https://github.com/nilkanthdesai76/swift-photo-dedupe.git` (or local path).
+
+### 2. Configure `Info.plist`
+Add the PhotoKit permission description to your iOS app's `Info.plist`:
+```xml
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Required to find duplicate and similar photos to reclaim storage.</string>
+```
+
+### 3. Drop-In SwiftUI View
+Add the full photo dedupe interface directly into your app in one line:
+```swift
+import SwiftUI
+import PhotoHashKit
+
+struct ContentView: View {
+    var body: some View {
+        NavigationStack {
+            PhotoDedupeIOSView()
+        }
+    }
+}
+```
+
+The drop-in `PhotoDedupeIOSView` automatically provides:
+- **Thermal Telemetry Badge**: Live color indicator showing device temperature (`Nominal (Cold)` / `Fair` / `Throttled`).
+- **Interactive Scan Bar**: Real-time progress with photo count and instant throttled pacing.
+- **Duplicate Cluster Cards**: Horizontal scrolling thumbnails with match tier tags (`Exact`, `Near`, `Burst/Similar`) and reclaimable size chips.
+- **Smart Keeper Badge**: Identifies the highest resolution / favorited photo as the keeper, with 1-tap keeper override.
+- **Side-by-Side Comparison Sheet**: Fullscreen inspection of resolution, EXIF capture date, and file size differences.
+- **Safe Trashing**: Calls Apple's PhotoKit `PHAssetChangeRequest.deleteAssets` to trigger the native iOS confirmation prompt and move unwanted copies to **"Recently Deleted"** (never permanently deleting files).
+
+### 4. Custom Architecture (ViewModel & Services)
+If you prefer building custom UI, all iOS services and view models are publicly accessible:
+```swift
+import PhotoHashKit
+
+@StateObject var viewModel = PhotoDedupeIOSViewModel()
+
+// 1. Scan library with thermal pacing
+await viewModel.startLibraryScan(includeSimilar: true)
+
+// 2. Access clusters
+for group in viewModel.filteredGroups {
+    print("Group: \(group.category), Reclaim: \(group.formattedReclaimableSize)")
+}
+
+// 3. Move duplicates to Recently Deleted
+await viewModel.trashDuplicates(in: group)
+```
+
+---
+
+## 🛠️ Swift Package Core API (macOS & iOS)
 
 Add PhotoHashKit to your `Package.swift`:
 ```swift
 dependencies: [
-    .package(path: "../swift-photo-dedupe")
+    .package(url: "https://github.com/nilkanthdesai76/swift-photo-dedupe.git", from: "1.0.0")
 ]
 ```
 

@@ -48,6 +48,10 @@ public struct DuplicateGroup: Identifiable, Hashable, Codable, Sendable {
     public var keeper: AssetSnapshot? {
         assets.first { $0.id == bestAssetId }
     }
+    
+    public var nonKeepers: [AssetSnapshot] {
+        assets.filter { $0.id != bestAssetId }
+    }
 }
 
 /// Comprehensive scan outcome metadata.
@@ -55,7 +59,7 @@ public struct DedupeScanResult: Codable, Sendable {
     public let scannedAt: Date
     public let durationSec: Double
     public let totalScanned: Int
-    public let groups: [DuplicateGroup]
+    public var groups: [DuplicateGroup]
     public let peakThermalState: String
     
     public init(
@@ -90,6 +94,10 @@ public struct DedupeScanResult: Codable, Sendable {
     
     public var totalReclaimableBytes: Int64 {
         groups.reduce(Int64(0)) { $0 + $1.reclaimableSize }
+    }
+    
+    public var totalReclaimableSize: Int64 {
+        totalReclaimableBytes
     }
     
     public var formattedReclaimableSize: String {

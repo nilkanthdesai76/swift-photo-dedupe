@@ -33,6 +33,9 @@ public struct ScanProgress: Sendable {
         self.currentGroupCount = currentGroupCount
     }
     
+    public var processedCount: Int { processed }
+    public var totalCount: Int { total }
+    
     public var fractionCompleted: Double {
         total > 0 ? Double(processed) / Double(total) : 0
     }
