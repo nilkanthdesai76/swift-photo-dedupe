@@ -60,14 +60,22 @@ By the Pigeonhole Principle, dividing a 64-bit hash into four 16-bit blocks guar
 
 ## 🚀 Quick Start & Testing
 
-### 1. Run via `launch.sh` (One-Click)
+### 1. Run the iOS Demo App
+Open and test the complete iOS demo app in Xcode (with real PhotoKit scanning, synthetic burst testing, and algorithm lab):
 ```bash
-cd swift-photo-dedupe
-chmod +x launch.sh
+./launch-demo.sh
+```
+Or open directly:
+```bash
+open Demo/Demo.xcodeproj
+```
+
+### 2. Run via `launch.sh` (macOS Suite)
+```bash
 ./launch.sh
 ```
 
-### 2. Run the CLI Benchmark
+### 3. Run the CLI Benchmark
 ```bash
 swift run PhotoDedupeCLI
 ```
@@ -76,7 +84,7 @@ Or scan a folder:
 swift run PhotoDedupeCLI ~/Pictures
 ```
 
-### 3. Run the macOS SwiftUI App
+### 4. Run the macOS SwiftUI App
 ```bash
 swift run PhotoDedupeApp
 ```
