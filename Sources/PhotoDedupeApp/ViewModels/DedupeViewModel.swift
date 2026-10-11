@@ -39,7 +39,7 @@ public final class DedupeViewModel: ObservableObject {
     public init() {
         self.thermalStateDescription = ThermalGovernor.shared.thermalStatusDescription
         ThermalGovernor.shared.addObserver { [weak self] _ in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 self?.thermalStateDescription = ThermalGovernor.shared.thermalStatusDescription
             }
         }
