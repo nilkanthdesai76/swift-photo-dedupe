@@ -137,4 +137,42 @@ final class PhotoHashKitTests: XCTestCase {
         let bestNoFav = BestPhotoSelector.pickBest(from: [asset1, asset2])
         XCTAssertEqual(bestNoFav, "2")
     }
+    
+    // MARK: - MatchCategory & Reclaimable Size Tests
+    
+    func testMatchCategoryClassification() {
+        let h1 = DualHash(dHash: 0x1111222233334444, pHash: 0x5555666677778888)
+        let hExact = DualHash(dHash: 0x1111222233334444, pHash: 0x5555666677778888)
+        let hNear = DualHash(dHash: 0x1111222233334445, pHash: 0x5555666677778889) // 2-bit diff
+        let hDiff = DualHash(dHash: 0x9999888877776666, pHash: 0x11110000FFFFEEEE)
+        
+        XCTAssertEqual(h1.matchCategory(to: hExact), .exactDuplicate)
+        XCTAssertEqual(h1.matchCategory(to: hNear), .nearDuplicate)
+        XCTAssertEqual(h1.matchCategory(to: hDiff), .different)
+    }
+    
+    func testReclaimableSizeCalculation() {
+        let a1 = AssetSnapshot(id: "1", filename: "1.jpg", pixelWidth: 1000, pixelHeight: 1000, fileSize: 1_000_000, isFavorite: false)
+        let a2 = AssetSnapshot(id: "2", filename: "2.jpg", pixelWidth: 1000, pixelHeight: 1000, fileSize: 1_000_000, isFavorite: false)
+        let a3 = AssetSnapshot(id: "3", filename: "3.jpg", pixelWidth: 1000, pixelHeight: 1000, fileSize: 2_000_000, isFavorite: true) // Keeper (2MB)
+        
+        let group = DuplicateGroup(
+            category: .exactDuplicate,
+            assets: [a1, a2, a3],
+            bestAssetId: "3",
+            similarityScore: 1.0
+        )
+        
+        XCTAssertEqual(group.totalSize, 4_000_000)
+        XCTAssertEqual(group.reclaimableSize, 2_000_000) // a1 + a2
+        XCTAssertEqual(group.nonKeepers.count, 2)
+        XCTAssertEqual(group.keeper?.id, "3")
+    }
+    
+    func testThermalGovernorStatus() {
+        let governor = ThermalGovernor.shared
+        XCTAssertGreaterThanOrEqual(governor.recommendedConcurrency, 1)
+        XCTAssertFalse(governor.thermalStatusDescription.isEmpty)
+    }
 }
+
